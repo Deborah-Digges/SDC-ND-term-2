@@ -7,8 +7,11 @@
 //============================================================================
 
 #include <iostream>
+#include "PrintString.h"
 
 int main() {
-	std::cout << "no more steering wheels" << std::endl;
+	std::cout << "hello" << std::endl;
+
+	PrintString("no more steering wheels", 5);
 	return 0;
 }
