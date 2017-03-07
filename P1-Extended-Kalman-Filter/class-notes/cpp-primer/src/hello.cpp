@@ -10,6 +10,7 @@
 #include "PrintString.h"
 #include "Factorial.h"
 #include "Car.h"
+#include "Doubler.h"
 
 int main() {
 	std::cout << "hello" << std::endl;
@@ -22,15 +23,21 @@ int main() {
 
 	Car car;
 
-	    // try to drive 10 times
-	    for (int i = 0; i < 10; i++) {
-	        bool didDrive = car.drive();
-	        if (!didDrive) {
-	            // car is broken! must fix it
-	            car.fix();
-	        }
-	    }
+	// try to drive 10 times
+	for (int i = 0; i < 10; i++) {
+		bool didDrive = car.drive();
+		if (!didDrive) {
+			// car is broken! must fix it
+			car.fix();
+		}
+	}
 
+	int value = 25;
 
+	std::cout << "Original value: " << value << std::endl;
+
+	Doubler(value);
+
+	std::cout << "Doubled value: " << value << std::endl;
 	return 0;
 }
