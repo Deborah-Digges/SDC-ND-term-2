@@ -8,10 +8,29 @@
 
 #include <iostream>
 #include "PrintString.h"
+#include "Factorial.h"
+#include "Car.h"
 
 int main() {
 	std::cout << "hello" << std::endl;
 
+	// Test PrintString method
 	PrintString("no more steering wheels", 5);
+
+	// Test Factorial method
+	std::cout << Factorial(4) << std::endl;
+
+	Car car;
+
+	    // try to drive 10 times
+	    for (int i = 0; i < 10; i++) {
+	        bool didDrive = car.drive();
+	        if (!didDrive) {
+	            // car is broken! must fix it
+	            car.fix();
+	        }
+	    }
+
+
 	return 0;
 }
