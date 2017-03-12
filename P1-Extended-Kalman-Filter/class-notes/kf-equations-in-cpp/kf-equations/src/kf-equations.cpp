@@ -127,6 +127,8 @@ void filter(VectorXd &x, MatrixXd &P) {
 		// new state
 		x = x_new;
 		P = p_new;
+		std::cout << "x_new=" <<  x << std::endl;
+		std::cout << "P_new=" <<  P << std::endl;
 
 		// KF Prediction step
 		x = F * x + u;
