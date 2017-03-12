@@ -121,12 +121,9 @@ void filter(VectorXd &x, MatrixXd &P) {
 		VectorXd z = measurements[n];
 
 		// KF Measurement update step
-		VectorXd x_new = x + kalman_gain() * (z - H * x);
-		MatrixXd p_new = P - kalman_gain() * (H * P);
+		x = x + kalman_gain() * (z - H * x);
+		P = P - kalman_gain() * (H * P);
 
-		// new state
-		x = x_new;
-		P = p_new;
 		std::cout << "x_new=" <<  x << std::endl;
 		std::cout << "P_new=" <<  P << std::endl;
 
