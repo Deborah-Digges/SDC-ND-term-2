@@ -109,19 +109,28 @@ int main() {
 
 }
 
+VectorXd kalman_gain() {
+	MatrixXd temp = H * P * H.transpose() + R;
+	return (P * H.transpose()) * (temp.inverse());
+}
 
 void filter(VectorXd &x, MatrixXd &P) {
 
 	for (unsigned int n = 0; n < measurements.size(); ++n) {
 
 		VectorXd z = measurements[n];
-		//YOUR CODE HERE
 
 		// KF Measurement update step
+		VectorXd x_new = x + kalman_gain() * (z - H * x);
+		MatrixXd p_new = P - kalman_gain() * (H * P);
 
 		// new state
+		x = x_new;
+		P = p_new;
 
 		// KF Prediction step
+		x = F * x + u;
+		P = F * P * F.transpose() + Q;
 
 		std::cout << "x=" << std::endl <<  x << std::endl;
 		std::cout << "P=" << std::endl <<  P << std::endl;
