@@ -58,8 +58,8 @@ MatrixXd CalculateJacobian(const VectorXd& x_state) {
 
 	Hj(2, 0) = py* (vx*py - vy*px)/pow(px2py2, 3/2);
 	Hj(2, 1) = px * (vy*px - vx*py)/pow(px2py2, 3/2);
-	Hj(2, 2) = px/px2py2;
-	Hj(2, 3) = py/px2py2;
+	Hj(2, 2) = px/sqrt(px2py2);
+	Hj(2, 3) = py/sqrt(px2py2);
 
 	return Hj;
 }
