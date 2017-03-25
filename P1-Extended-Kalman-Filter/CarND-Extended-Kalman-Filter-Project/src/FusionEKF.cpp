@@ -116,24 +116,18 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 	float dt = (measurement_pack.timestamp_ - previous_timestamp_) / 1000000.0;	//dt - expressed in seconds
 	previous_timestamp_ = measurement_pack.timestamp_;
 
-	std::cout << "dt:" << dt << std::endl;
 	ekf_.F_ << 1, 0, dt, 0,
 			0, 1, 0, dt,
 			0, 0, 1, 0,
 			0, 0, 0, 1;
-
-	std::cout << "F:" << ekf_.F_ << std::endl;
 
 	ekf_.Q_ << pow(dt, 4) / 4 * noise_ax, 0, pow(dt, 3) / 2 * noise_ax, 0,
 		   0, pow(dt, 4) / 4 * noise_ay, 0, pow(dt, 3) / 2 * noise_ay,
 		   pow(dt, 3) / 2 * noise_ax, 0, pow(dt, 2) * noise_ax, 0,
 		   0, pow(dt, 3) / 2 * noise_ay, 0, pow(dt, 2) * noise_ay;
 
-	std::cout << "Q:" << ekf_.Q_ << std::endl;
-
 	ekf_.Predict();
 
-	std::cout << "X_pred: " << ekf_.x_ << std::endl;
 	/*****************************************************************************
 	 *  Update
 	 ****************************************************************************/
@@ -148,7 +142,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		std::cout << "RADAR" << std::endl;
 		// Radar updates
 		Hj_ = tools.CalculateJacobian(ekf_.x_);
-		std::cout << Hj_ << std::endl;
 		ekf_.H_ = Hj_;
 		ekf_.R_ = R_radar_;
 
