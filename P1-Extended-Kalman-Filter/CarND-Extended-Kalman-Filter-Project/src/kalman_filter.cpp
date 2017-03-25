@@ -87,34 +87,23 @@ double SNormalizeAngle(double phi)
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-	/**
-		TODO:
-	* update the state by using Extended Kalman Filter equations
-	*/
 	// Use the non-linear function to project the predicted state
 	// into the measurement space
-	std::cout << "z:" << z << std::endl;
+
 	VectorXd z_pred = h(x_);
-	std::cout << "zpred:" << z_pred << std::endl;
 	VectorXd y = z - z_pred;
 
 	y[1] = SNormalizeAngle(y[1]);
-	std::cout << "y:" << y << std::endl;
+
 	MatrixXd Ht = H_.transpose();
-	std::cout << "Ht:" << Ht << std::endl;
 	MatrixXd S = H_ * P_ * Ht + R_;
-	std::cout << "S" << S << std::endl;
 	MatrixXd Si = S.inverse();
-	std::cout << "S_inv:" << Si << std::endl;
 	MatrixXd PHt = P_ * Ht;
-	std::cout << "PHt:" << PHt << std::endl;
 	MatrixXd K = PHt * Si;
-	std::cout << "K:" << K << std::endl;
+
 	//new estimate
 	x_ = x_ + (K * y);
-	std::cout << "x_:" << x_ << std::endl;
 	long x_size = x_.rows();
-	std::cout << "x_size" << x_size << std::endl;
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 	P_ = (I - K * H_) * P_;
 }
