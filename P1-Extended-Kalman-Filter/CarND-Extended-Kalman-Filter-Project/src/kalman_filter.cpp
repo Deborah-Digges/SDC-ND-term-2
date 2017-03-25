@@ -68,6 +68,7 @@ VectorXd h(VectorXd predicted_state) {
 	return projected_state;
 
 }
+
 double SNormalizeAngle(double phi)
 {
   const double Max = M_PI;
@@ -79,27 +80,27 @@ double SNormalizeAngle(double phi)
 }
 
 void KalmanFilter::UpdateEKF(const VectorXd &z) {
-  /**
-  TODO:
-    * update the state by using Extended Kalman Filter equations
-  */
-  // Use the non-linear function to project the predicted state
-  // into the measurement space
-//	VectorXd z_pred = h(x_);
-//	VectorXd y = z - z_pred;
-//
-//	y[1] = SNormalizeAngle(y[1]);
-//	MatrixXd Ht = H_.transpose();
-//	MatrixXd S = H_ * P_ * Ht + R_;
-//	MatrixXd Si = S.inverse();
-//	MatrixXd PHt = P_ * Ht;
-//	MatrixXd K = PHt * Si;
-//
-//	//new estimate
-//	x_ = x_ + (K * y);
-//	long x_size = x_.rows();
-//	MatrixXd I = MatrixXd::Identity(x_size, x_size);
-//	P_ = (I - K * H_) * P_;
+	/**
+		TODO:
+	* update the state by using Extended Kalman Filter equations
+	*/
+	// Use the non-linear function to project the predicted state
+	// into the measurement space
+	VectorXd z_pred = h(x_);
+	VectorXd y = z - z_pred;
+
+	y[1] = SNormalizeAngle(y[1]);
+	MatrixXd Ht = H_.transpose();
+	MatrixXd S = H_ * P_ * Ht + R_;
+	MatrixXd Si = S.inverse();
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd K = PHt * Si;
+
+	//new estimate
+	x_ = x_ + (K * y);
+	long x_size = x_.rows();
+	MatrixXd I = MatrixXd::Identity(x_size, x_size);
+	P_ = (I - K * H_) * P_;
 }
 
 
