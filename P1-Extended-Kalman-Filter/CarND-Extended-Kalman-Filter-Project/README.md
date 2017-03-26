@@ -6,22 +6,23 @@ Implementation of an Extended Kalman Filter using C++.
 ## Results
 
 ### Data Set 1
+ 
 |     | RMSE      |
 | --- |:---------:| 
-| px  | 0.0729152 | 
-| py  | 0.0817211 | 
-| vx  | 0.562461  | 
-| vy  | 0.564008  | 
+| px  | 0.0651654 | 
+| py  | 0.0605668 | 
+| vx  | 0.542699  | 
+| vy  | 0.551745  | 
 
 ![Data Set 1](images/data-set-1.png)
 
 ### Data Set 2
 |     | RMSE      |
 | --- |:---------:| 
-| px  | 0.186444  | 
-| py  | 0.190095  | 
-| vx  | 0.491225  | 
-| vy  | 0.862305  | 
+| px  | 0.185496  | 
+| py  | 0.190302  | 
+| vx  | 0.476754  | 
+| vy  | 0.804469  | 
 
 ![Data Set 2](images/data-set-2.png)
 
