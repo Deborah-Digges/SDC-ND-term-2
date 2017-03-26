@@ -55,6 +55,7 @@ FusionEKF::FusionEKF() {
 		   0, 0, 0, 1;
 	noise_ax = 9;
 	noise_ay = 9;
+
 }
 
 /**
@@ -118,10 +119,10 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 			0, 0, 1, 0,
 			0, 0, 0, 1;
 
-	ekf_.Q_ << pow(dt, 4) / 4 * noise_ax, 0, pow(dt, 3) / 2 * noise_ax, 0,
-		   0, pow(dt, 4) / 4 * noise_ay, 0, pow(dt, 3) / 2 * noise_ay,
-		   pow(dt, 3) / 2 * noise_ax, 0, pow(dt, 2) * noise_ax, 0,
-		   0, pow(dt, 3) / 2 * noise_ay, 0, pow(dt, 2) * noise_ay;
+	ekf_.Q_ << pow(dt, 4) / 4.0 * noise_ax, 0, pow(dt, 3) / 2.0 * noise_ax, 0,
+		   0, pow(dt, 4) / 4.0 * noise_ay, 0, pow(dt, 3) / 2.0 * noise_ay,
+		   pow(dt, 3) / 2.0 * noise_ax, 0, pow(dt, 2) * noise_ax, 0,
+		   0, pow(dt, 3) / 2.0 * noise_ay, 0, pow(dt, 2) * noise_ay;
 
 	if(dt > 0.001) {
 		ekf_.Predict();
@@ -144,7 +145,6 @@ void FusionEKF::ProcessMeasurement(const MeasurementPackage &measurement_pack) {
 		Hj_ = tools.CalculateJacobian(ekf_.x_);
 		ekf_.H_ = Hj_;
 		ekf_.R_ = R_radar_;
-
 		ekf_.UpdateEKF(measurement_pack.raw_measurements_);
 	} else {
 		std::cout << "LASER" << std::endl;
