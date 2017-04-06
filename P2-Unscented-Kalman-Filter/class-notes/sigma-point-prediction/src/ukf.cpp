@@ -26,34 +26,40 @@ VectorXd calculate_transition(VectorXd sigma_point, double delta_t, int n_x) {
 	double long_acceleration = sigma_point(5);
 	double yaw_rate_acceleration =  sigma_point(6);
 
+	VectorXd process_noise(n_x);
 
-	transition(0) = (v/(float)psi_dot * (sin(psi + psi_dot * delta_t) - sin(psi)) + (1/2.0 * delta_t * delta_t * cos(psi) * long_acceleration));
-	transition(1) = (v/(float)psi_dot * (-cos(psi + psi_dot * delta_t) + cos(psi)) + (1/2.0 * delta_t * delta_t * sin(psi) * long_acceleration));
-	transition(2) = (long_acceleration * delta_t);
-	transition(3) = (psi_dot * delta_t + (1/2.0 * delta_t * delta_t * yaw_rate_acceleration));
-	transition(4) = (yaw_rate_acceleration * delta_t);
+	process_noise(0) = (1/2.0 * delta_t * delta_t * cos(psi) * long_acceleration);
+	process_noise(1) = (1/2.0 * delta_t * delta_t * sin(psi) * long_acceleration);
+	process_noise(2) = (long_acceleration * delta_t);
+	process_noise(3) = (1/2.0 * delta_t * delta_t * yaw_rate_acceleration);
+	process_noise(4) = (yaw_rate_acceleration * delta_t);
 
-	return transition;
+	if(psi_dot != 0) {
+		transition(0) = (v/(float)psi_dot * (sin(psi + psi_dot * delta_t) - sin(psi)));
+		transition(1) = (v/(float)psi_dot * (-cos(psi + psi_dot * delta_t) + cos(psi)));
+		transition(2) = 0;
+		transition(3) = (psi_dot * delta_t);
+		transition(4) = 0;
+	} else {
+		transition(0) = (v * cos(psi) * delta_t);
+		transition(1) = (v * sin(psi) * delta_t);
+		transition(2) = 0;
+		transition(3) = (psi_dot * delta_t);
+		transition(4) = 0;
+	}
+
+	return transition + process_noise;
 }
 
 VectorXd predict(VectorXd sigma_point, double delta_t, int n_x) {
 	return sigma_point.head(n_x) + calculate_transition(sigma_point, delta_t, n_x);
 }
 
-VectorXd predictForZeroYawRate(VectorXd sigma_point, double delta_t, int n_x) {
-	VectorXd predicted_point(n_x);
-	predicted_point.head(n_x) = sigma_point.head(5);
-	return predicted_point;
-}
+
 
 void predictSigmaPoints(MatrixXd Xsig_aug, MatrixXd* Xsig_pred, double delta_t, int n_x) {
 	for(int i=0; i<Xsig_aug.cols(); ++i) {
-		// If yaw rate is zero, use the right set of equations
-		if(Xsig_aug.col(i)(4) == 0) {
-			(*Xsig_pred).col(i) = predictForZeroYawRate(Xsig_aug.col(i), delta_t, n_x);
-		} else {
-			(*Xsig_pred).col(i) = predict(Xsig_aug.col(i), delta_t, n_x);
-		}
+		(*Xsig_pred).col(i) = predict(Xsig_aug.col(i), delta_t, n_x);
 	}
 }
 
