@@ -256,6 +256,27 @@ MatrixXd UKF::compute_covariance() {
 	return P;
 }
 
+VectorXd UKF::transform_to_measurement_space(VectorXd predicted_state_sigma_point) {
+	VectorXd measurement_space_sigma_point(3);
+
+	double px = predicted_state_sigma_point(0);
+	double py = predicted_state_sigma_point(1);
+	double v = predicted_state_sigma_point(2);
+	double psi = predicted_state_sigma_point(3);
+	double psi_dot = predicted_state_sigma_point(4);
+
+	// Rho
+	measurement_space_sigma_point(0) = sqrt(pow(px, 2) + pow(py, 2));
+
+	// Phi
+	measurement_space_sigma_point(1) = atan(py/px);
+
+	// Rho - dot
+	measurement_space_sigma_point(2) = ((px * v * cos(psi) + py * v * sin(psi))/measurement_space_sigma_point(0));
+
+	return measurement_space_sigma_point;
+}
+
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
  * @param {double} delta_t the change in time (in seconds) between the last
@@ -313,13 +334,61 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
 	 You'll also need to calculate the radar NIS.
 	 */
+
+
 	// Map the predicted state x_ to the the measurement space
-		// Use the predicted sigma points
-		// Transform each predicted sigma point to measurement space
-		// Calculate the mean z_pred and the covariance S of the predicted points
-			// TODO: For this need the covariance matrix R_RADAR [3 x 3] to be added
+
+	int n_z_ = 3; // Number of dimensions in the measurement space for RADAR
+	MatrixXd Zsig = MatrixXd(n_z_, 2 * n_aug_ + 1);
+	//transform sigma points into measurement space
+	for(int i=0; i<Xsig_pred_.cols(); ++i) {
+	  Zsig.col(i) = transform_to_measurement_space(Xsig_pred_.col(i));
+	}
+
+	// Calculate the mean z_pred and the covariance S of the predicted points
+	VectorXd z_pred = VectorXd(n_z_);
+	z_pred.fill(0.0);
+
+	//measurement covariance matrix S
+	MatrixXd S = MatrixXd(n_z_, n_z_);
+	S = R_radar_;
+	for(int i=0; i<Zsig.cols(); ++i) {
+		VectorXd diff = Zsig.col(i) - z_pred;
+		while (diff(1)> M_PI) diff(1)-=2.*M_PI;
+		while (diff(1)<-M_PI) diff(1)+=2.*M_PI;
+
+		S += (weights_(i) * (diff * diff.transpose()));
+	}
 
 	// Calculate the cross-correlation matrix
+	MatrixXd Tc = MatrixXd(n_x_, n_z_);
+	Tc.fill(0.0);
+	for(int i=0;i<2 * n_aug_ + 1; ++i) {
+	VectorXd diff_x = (Xsig_pred_.col(i) - x_);
+		while (diff_x(3)> M_PI) diff_x(3)-=2.*M_PI;
+		while (diff_x(3)<-M_PI) diff_x(3)+=2.*M_PI;
+
+		VectorXd diff_z = Zsig.col(i) - z_pred;
+
+		while (diff_z(1)> M_PI) diff_z(1)-=2.*M_PI;
+		while (diff_z(1)<-M_PI) diff_z(1)+=2.*M_PI;
+
+		Tc += (weights_(i) * (diff_x * diff_z.transpose()));
+	}
 	// Use these to update the state x_ and P_ using the Kalman Gain
-	// Calculate NIS
+	MatrixXd K(n_x_, n_z_);
+	K = Tc * S.inverse();
+
+	//residual
+	VectorXd z = meas_package.raw_measurements_;
+	VectorXd z_diff = z - z_pred;
+
+	//angle normalization
+	while (z_diff(1)> M_PI) z_diff(1)-=2.*M_PI;
+	while (z_diff(1)<-M_PI) z_diff(1)+=2.*M_PI;
+	//update state mean and covariance matrix
+	x_ = x_ + K* (z_diff);
+	P_ = P_ - K * S * K.transpose();
+
+	// TODO: Calculate NIS
 }
