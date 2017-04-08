@@ -68,6 +68,19 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	 Complete this function! Make sure you switch between lidar and radar
 	 measurements.
 	 */
+	// If not initialized, initialize
+		// Initialize state x based on whether RADAR or LIDAR
+		// timestamp
+		// return
+	// Calculate delta_t
+	// Call Predict
+	// Check Sensor Type
+		// RADAR
+			// Set R
+			// UpdateRadar
+		// Laser
+			// Set R
+			// Update Laser
 }
 
 /**
