@@ -75,6 +75,8 @@ public:
 
   MatrixXd R_radar_;
 
+  double previous_timestamp;
+
   /**
    * Constructor
    */

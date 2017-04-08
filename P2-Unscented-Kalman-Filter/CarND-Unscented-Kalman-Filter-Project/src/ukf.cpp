@@ -83,27 +83,27 @@ UKF::UKF() {
 				0, pow(std_radphi_, 2), 0,
 				0, 0, pow(std_radrd_, 2);
 
-	std::cout << "is_initialized_" << is_initialized_ << std::endl;
-	std::cout << "use_laser_" << use_laser_ << std::endl;
-	std::cout << "use_radar_" << use_radar_ << std::endl;
-	std::cout << "x_" << x_ << std::endl;
-	std::cout << "P_" << P_ << std::endl;
-	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
-	std::cout << "std_a_" << std_a_ << std::endl;
-	std::cout << "std_yawdd_" << std_yawdd_ << std::endl;
-	std::cout << "std_laspx_" <<  std_laspx_ << std::endl;
-	std::cout << "std_laspy_" << std_laspy_ << std::endl;
-	std::cout << "std_radr_" <<std_radr_ << std::endl;
-	std::cout << "std_radphi_" << std_radphi_ << std::endl;
-	std::cout << "std_radrd_" << std_radrd_  << std::endl;
-	std::cout << "weights_" << weights_ << std::endl;
-	std::cout << "n_x_" << n_x_ << std::endl;
-	std::cout << "n_aug_" << n_aug_ << std::endl;
-	std::cout << "lambda_" << lambda_ << std::endl;
-	std::cout << "NIS_radar_" << NIS_radar_ << std::endl;
-	std::cout << "NIS_laser_" << NIS_laser_ << std::endl;
-	std::cout << "R_laser_" << R_laser_ << std::endl;
-	std::cout << "R_radar_" << R_radar_ << std::endl;
+//	std::cout << "is_initialized_" << is_initialized_ << std::endl;
+//	std::cout << "use_laser_" << use_laser_ << std::endl;
+//	std::cout << "use_radar_" << use_radar_ << std::endl;
+//	std::cout << "x_" << x_ << std::endl;
+//	std::cout << "P_" << P_ << std::endl;
+//	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
+//	std::cout << "std_a_" << std_a_ << std::endl;
+//	std::cout << "std_yawdd_" << std_yawdd_ << std::endl;
+//	std::cout << "std_laspx_" <<  std_laspx_ << std::endl;
+//	std::cout << "std_laspy_" << std_laspy_ << std::endl;
+//	std::cout << "std_radr_" <<std_radr_ << std::endl;
+//	std::cout << "std_radphi_" << std_radphi_ << std::endl;
+//	std::cout << "std_radrd_" << std_radrd_  << std::endl;
+//	std::cout << "weights_" << weights_ << std::endl;
+//	std::cout << "n_x_" << n_x_ << std::endl;
+//	std::cout << "n_aug_" << n_aug_ << std::endl;
+//	std::cout << "lambda_" << lambda_ << std::endl;
+//	std::cout << "NIS_radar_" << NIS_radar_ << std::endl;
+//	std::cout << "NIS_laser_" << NIS_laser_ << std::endl;
+//	std::cout << "R_laser_" << R_laser_ << std::endl;
+//	std::cout << "R_radar_" << R_radar_ << std::endl;
 }
 
 UKF::~UKF() {
@@ -121,9 +121,20 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	 measurements.
 	 */
 	// If not initialized, initialize
+	if(!is_initialized_) {
 		// Initialize state x based on whether RADAR or LIDAR
-		// timestamp
-		// return
+		if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+			double rho = meas_package.raw_measurements_[0];
+			double phi = meas_package.raw_measurements_[1];
+			double rho_dot = meas_package.raw_measurements_[2];
+			x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
+		} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+			x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
+		}
+		previous_timestamp = meas_package.timestamp_;
+		return;
+	}
+
 	// Calculate delta_t
 	// Call Predict
 	// Check Sensor Type
