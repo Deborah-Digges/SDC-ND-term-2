@@ -83,6 +83,8 @@ UKF::UKF() {
 				0, pow(std_radphi_, 2), 0,
 				0, 0, pow(std_radrd_, 2);
 
+	previous_timestamp_ = 0;
+
 //	std::cout << "is_initialized_" << is_initialized_ << std::endl;
 //	std::cout << "use_laser_" << use_laser_ << std::endl;
 //	std::cout << "use_radar_" << use_radar_ << std::endl;
@@ -148,6 +150,37 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	}
 }
 
+MatrixXd UKF::generate_sigma_points() {
+
+	//create sigma point matrix
+	MatrixXd Xsig_aug = MatrixXd(n_aug_, 2 * n_aug_ + 1);
+
+	// Create Augmented state mean vector x_aug and augmented state covariance matrix P_aug
+	VectorXd x_aug = VectorXd(n_aug_);
+	x_aug.fill(0.0);
+	x_aug.segment(0, n_x_) = x_;
+
+	//create augmented state covariance
+	MatrixXd P_aug = MatrixXd(n_aug_, n_aug_);
+	P_aug.fill(0.0);
+	P_aug.topLeftCorner(n_x_, n_x_) = P_;
+	P_aug(n_x_, n_x_) = pow(std_a_, 2);
+	P_aug(n_x_ + 1, n_x_ + 1) = pow(std_yawdd_, 2);
+
+	//create square root matrix
+	MatrixXd A = P_aug.llt().matrixL();
+
+	//create augmented sigma points
+	Xsig_aug.col(0) = x_aug;
+	MatrixXd term = sqrt(lambda_ + n_aug_) * A;
+	for (int i = 0; i < n_aug_; ++i) {
+		Xsig_aug.col(i + 1) = x_aug + term.col(i);
+		Xsig_aug.col(i + n_aug_ + 1) = x_aug - term.col(i);
+	}
+
+	return Xsig_aug;
+}
+
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
  * @param {double} delta_t the change in time (in seconds) between the last
@@ -158,8 +191,9 @@ void UKF::Prediction(double delta_t) {
 	 Complete this function! Estimate the object's location. Modify the state
 	 vector, x_. Predict sigma points, the state, and the state covariance matrix.
 	 */
-	// Create Augmented state mean vector x_aug and augmented state covariance matrix P_aug
-	// Generate Sigma points for the augmented state matrix(7, 2*7 +1)
+	// Generate Sigma points
+	MatrixXd Xsig_aug = generate_sigma_points();
+
 	// Use the prediction function to predict the k+1 values for these sigma points matrix(5, 2*7+1)
 		// TODO: Need to store these predicted sigma points for use in the measurement update step
 	// Use these values to compute the mean and covariance for the state predicted at time k+1
