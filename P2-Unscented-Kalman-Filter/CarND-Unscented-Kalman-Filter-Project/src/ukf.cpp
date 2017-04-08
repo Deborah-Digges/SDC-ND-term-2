@@ -90,8 +90,6 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
  */
 void UKF::Prediction(double delta_t) {
 	/**
-	 TODO:
-
 	 Complete this function! Estimate the object's location. Modify the state
 	 vector, x_. Predict sigma points, the state, and the state covariance matrix.
 	 */
@@ -109,8 +107,6 @@ void UKF::Prediction(double delta_t) {
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	/**
-	 TODO:
-
 	 Complete this function! Use lidar data to update the belief about the object's
 	 position. Modify the state vector, x_, and covariance, P_.
 
@@ -134,8 +130,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  */
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	/**
-	 TODO:
-
 	 Complete this function! Use radar data to update the belief about the object's
 	 position. Modify the state vector, x_, and covariance, P_.
 
@@ -145,6 +139,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 		// Use the predicted sigma points
 		// Transform each predicted sigma point to measurement space
 		// Calculate the mean z_pred and the covariance S of the predicted points
+			// TODO: For this need the covariance matrix R_RADAR [3 x 3] to be added
 
 	// Calculate the cross-correlation matrix
 	// Use these to update the state x_ and P_ using the Kalman Gain
