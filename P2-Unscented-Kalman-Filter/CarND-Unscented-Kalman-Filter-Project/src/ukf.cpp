@@ -12,6 +12,11 @@ using std::vector;
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
+	//	 TODO: Change values for std_a_ and std_yawdd_
+
+	// Initially the UKF is not initialized
+	is_initialized_ = false;
+
 	// if this is false, laser measurements will be ignored (except during init)
 	use_laser_ = true;
 
@@ -20,9 +25,19 @@ UKF::UKF() {
 
 	// initial state vector
 	x_ = VectorXd(5);
+	x_.fill(0.0);
 
 	// initial covariance matrix
 	P_ = MatrixXd(5, 5);
+	P_.fill(0.0);
+
+	// Number of rows in our state vector
+	n_x_ = x_.rows();
+
+	// Number of rows in our state vector + 2 rows for the noise processes
+	n_aug_ = n_x_ + 2;
+
+	Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
 	std_a_ = 30;
@@ -45,13 +60,39 @@ UKF::UKF() {
 	// Radar measurement noise standard deviation radius change in m/s
 	std_radrd_ = 0.3;
 
-	/**
-	 TODO:
+	lambda_ = 3 - n_aug_;
 
-	 Complete the initialization. See ukf.h for other member properties.
+	weights_ = VectorXd(2*n_aug_ + 1);
 
-	 Hint: one or more values initialized above might be wildly off...
-	 */
+	weights_(0) = lambda_ / float(lambda_ + n_aug_);
+	double common_weight = 1 / float(2 *(lambda_ + n_aug_));
+
+	for(int i=1; i<weights_.size(); ++i) {
+	  weights_(i) = common_weight;
+	}
+
+	NIS_radar_ = 0;
+	NIS_laser_ = 0;
+
+//	std::cout << "is_initialized_" << is_initialized_ << std::endl;
+//	std::cout << "use_laser_" << use_laser_ << std::endl;
+//	std::cout << "use_radar_" << use_radar_ << std::endl;
+//	std::cout << "x_" << x_ << std::endl;
+//	std::cout << "P_" << P_ << std::endl;
+//	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
+//	std::cout << "std_a_" << std_a_ << std::endl;
+//	std::cout << "std_yawdd_" << std_yawdd_ << std::endl;
+//	std::cout << "std_laspx_" <<  std_laspx_ << std::endl;
+//	std::cout << "std_laspy_" << std_laspy_ << std::endl;
+//	std::cout << "std_radr_" <<std_radr_ << std::endl;
+//	std::cout << "std_radphi_" << std_radphi_ << std::endl;
+//	std::cout << "std_radrd_" << std_radrd_  << std::endl;
+//	std::cout << "weights_" << weights_ << std::endl;
+//	std::cout << "n_x_" << n_x_ << std::endl;
+//	std::cout << "n_aug_" << n_aug_ << std::endl;
+//	std::cout << "lambda_" << lambda_ << std::endl;
+//	std::cout << "NIS_radar_" << NIS_radar_ << std::endl;
+//	std::cout << "NIS_laser_" << NIS_laser_ << std::endl;
 }
 
 UKF::~UKF() {
