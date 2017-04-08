@@ -77,6 +77,7 @@ public:
 
   double previous_timestamp_;
 
+  MatrixXd H_laser_;
   /**
    * Constructor
    */

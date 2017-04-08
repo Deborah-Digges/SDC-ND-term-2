@@ -85,6 +85,9 @@ UKF::UKF() {
 
 	previous_timestamp_ = 0;
 
+	H_laser_ = MatrixXd(2, n_x_);
+	H_laser_ << 1, 0, 0, 0, 0,
+				0, 1, 0, 0, 0;
 //	std::cout << "is_initialized_" << is_initialized_ << std::endl;
 //	std::cout << "use_laser_" << use_laser_ << std::endl;
 //	std::cout << "use_radar_" << use_radar_ << std::endl;
@@ -320,7 +323,22 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 		// R is the 2 x 2 Matrix - TODO: need to know the noise of laser for px and py measurements
 		// TODO: Add R_laser as a member of the ukf class
 	// Use Kalman Filter equations to update x_ and P_
-	// Calculate NIS
+	VectorXd z_pred = H_laser_ * x_;
+	VectorXd z = meas_package.raw_measurements_;
+	VectorXd y = z - z_pred;
+	MatrixXd Ht = H_laser_.transpose();
+	MatrixXd S = H_laser_ * P_ * H_laser_ + R_laser_;
+	MatrixXd Si = S.inverse();
+	MatrixXd PHt = P_ * Ht;
+	MatrixXd K = PHt * Si;
+
+	//new estimate
+	x_ = x_ + (K * y);
+	long x_size = x_.rows();
+	MatrixXd I = MatrixXd::Identity(x_size, x_size);
+	P_ = (I - K * H_laser_) * P_;
+
+	// TODO: Calculate NIS
 }
 
 /**
