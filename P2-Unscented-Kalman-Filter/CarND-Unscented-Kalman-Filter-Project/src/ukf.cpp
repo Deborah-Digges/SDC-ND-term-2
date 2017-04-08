@@ -40,10 +40,10 @@ UKF::UKF() {
 	Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
-	std_a_ = 30;
+	std_a_ = 1.5;
 
 	// Process noise standard deviation yaw acceleration in rad/s^2
-	std_yawdd_ = 30;
+	std_yawdd_ = 0.55;
 
 	// Laser measurement noise standard deviation position1 in m
 	std_laspx_ = 0.15;
@@ -272,10 +272,10 @@ VectorXd UKF::transform_to_measurement_space(VectorXd predicted_state_sigma_poin
 	measurement_space_sigma_point(0) = sqrt(pow(px, 2) + pow(py, 2));
 
 	// Phi
-	measurement_space_sigma_point(1) = atan(py/px);
+	measurement_space_sigma_point(1) = atan(py/float(px));
 
 	// Rho - dot
-	measurement_space_sigma_point(2) = ((px * v * cos(psi) + py * v * sin(psi))/measurement_space_sigma_point(0));
+	measurement_space_sigma_point(2) = ((px * v * cos(psi) + py * v * sin(psi))/float(measurement_space_sigma_point(0)));
 
 	return measurement_space_sigma_point;
 }
