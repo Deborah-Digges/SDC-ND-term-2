@@ -131,19 +131,21 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 		} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
 			x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
 		}
-		previous_timestamp = meas_package.timestamp_;
+		previous_timestamp_ = meas_package.timestamp_;
 		return;
 	}
 
-	// Calculate delta_t
-	// Call Predict
-	// Check Sensor Type
-		// RADAR
-			// Set R
-			// UpdateRadar
-		// Laser
-			// Set R
-			// Update Laser
+	float dt = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
+
+	if(dt > 0.001) {
+		Prediction(dt);
+	}
+
+	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+		UpdateRadar(meas_package);
+	} else {
+		UpdateLidar(meas_package);
+	}
 }
 
 /**
