@@ -230,6 +230,15 @@ MatrixXd UKF::predictSigmaPoints(MatrixXd Xsig_aug, double delta_t) {
 	return predictions;
 }
 
+VectorXd UKF::compute_mean(){
+	VectorXd x(n_x_);
+	x.fill(0.0);
+	//predict state mean
+	for(int i=0;i < Xsig_pred_.cols(); ++i) {
+	  x += (weights_(i) * Xsig_pred_.col(i));
+	}
+	return x;
+}
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
  * @param {double} delta_t the change in time (in seconds) between the last
@@ -247,9 +256,9 @@ void UKF::Prediction(double delta_t) {
 	// Use the prediction function to predict the k+1 values for these sigma points
 	Xsig_pred_ = predictSigmaPoints(Xsig_aug, delta_t);
 
-	// Use these values to compute the mean and covariance for the state predicted at time k+1
+	// Use these values to compute the mean and co-variance for the state predicted at time k+1
+	x_ << compute_mean();
 
-	// Store the state in x_ and P_
 }
 
 /**
