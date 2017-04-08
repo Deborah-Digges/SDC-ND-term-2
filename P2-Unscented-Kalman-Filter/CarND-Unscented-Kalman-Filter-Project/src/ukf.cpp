@@ -137,6 +137,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 			x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
 		}
 		previous_timestamp_ = meas_package.timestamp_;
+		is_initialized_ = true;
 		return;
 	}
 
@@ -180,7 +181,6 @@ MatrixXd UKF::generate_sigma_points() {
 		Xsig_aug.col(i + 1) = x_aug + term.col(i);
 		Xsig_aug.col(i + n_aug_ + 1) = x_aug - term.col(i);
 	}
-
 	return Xsig_aug;
 }
 
@@ -315,10 +315,13 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	 You'll also need to calculate the lidar NIS.
 	 */
 	VectorXd z_pred = H_laser_ * x_;
+
 	VectorXd z = meas_package.raw_measurements_;
+
 	VectorXd y = z - z_pred;
+
 	MatrixXd Ht = H_laser_.transpose();
-	MatrixXd S = H_laser_ * P_ * H_laser_ + R_laser_;
+	MatrixXd S = H_laser_ * P_ * Ht + R_laser_;
 	MatrixXd Si = S.inverse();
 	MatrixXd PHt = P_ * Ht;
 	MatrixXd K = PHt * Si;
@@ -328,7 +331,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	long x_size = x_.rows();
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 	P_ = (I - K * H_laser_) * P_;
-
 	// TODO: Calculate NIS
 }
 
