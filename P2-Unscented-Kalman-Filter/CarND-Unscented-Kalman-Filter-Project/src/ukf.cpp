@@ -116,6 +116,16 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 
 	 You'll also need to calculate the lidar NIS.
 	 */
+	// Calculate Z-pred using the H matrix
+		// We have the predicted state x_ (5 x 1) which we want to transform to the measurement space(2 X 1)
+		// We need a 2 x 5 H matrix:
+		// [ 1 0 0 0 0]
+	    // [ 0 1 0 0 0]
+		// Calculate the z value corresponding to the predicted state: z = H * x_
+		// R is the 2 x 2 Matrix - TODO: need to know the noise of laser for px and py measurements
+		// TODO: Add R_laser as a member of the ukf class
+	// Use Kalman Filter equations to update x_ and P_
+	// Calculate NIS
 }
 
 /**
@@ -138,4 +148,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
 	// Calculate the cross-correlation matrix
 	// Use these to update the state x_ and P_ using the Kalman Gain
+	// Calculate NIS
 }
