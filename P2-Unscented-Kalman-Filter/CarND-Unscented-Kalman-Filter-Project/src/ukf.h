@@ -118,6 +118,7 @@ private:
 	VectorXd predict(VectorXd sigma_point, double delta_t);
 	VectorXd calculate_transition(VectorXd sigma_point, double delta_t);
 	VectorXd compute_mean();
+	MatrixXd compute_covariance();
 };
 
 #endif /* UKF_H */

@@ -239,6 +239,23 @@ VectorXd UKF::compute_mean(){
 	}
 	return x;
 }
+
+MatrixXd UKF::compute_covariance() {
+	MatrixXd P(n_x_, n_x_);
+	//predict state covariance matrix
+
+	for(int i=0;i < Xsig_pred_.cols(); ++i) {
+		// state difference
+		VectorXd x_diff = Xsig_pred_.col(i) - x_;
+		//angle normalization
+		while (x_diff(3)> M_PI) x_diff(3)-=2.*M_PI;
+		while (x_diff(3)<-M_PI) x_diff(3)+=2.*M_PI;
+
+		P = P + weights_(i) * x_diff * x_diff.transpose() ;
+	}
+	return P;
+}
+
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
  * @param {double} delta_t the change in time (in seconds) between the last
@@ -259,6 +276,7 @@ void UKF::Prediction(double delta_t) {
 	// Use these values to compute the mean and co-variance for the state predicted at time k+1
 	x_ << compute_mean();
 
+	P_ << compute_covariance();
 }
 
 /**
