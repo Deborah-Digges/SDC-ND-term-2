@@ -181,6 +181,55 @@ MatrixXd UKF::generate_sigma_points() {
 	return Xsig_aug;
 }
 
+VectorXd UKF::calculate_transition(VectorXd sigma_point, double delta_t) {
+	VectorXd transition(n_x_);
+	transition.fill(0.0);
+
+	double px = sigma_point(0);
+	double py = sigma_point(1);
+	double v = sigma_point(2);
+	double psi = sigma_point(3);
+	double psi_dot = sigma_point(4);
+	double long_acceleration = sigma_point(5);
+	double yaw_rate_acceleration =  sigma_point(6);
+
+	VectorXd process_noise(n_x_);
+
+	process_noise(0) = (1/2.0 * delta_t * delta_t * cos(psi) * long_acceleration);
+	process_noise(1) = (1/2.0 * delta_t * delta_t * sin(psi) * long_acceleration);
+	process_noise(2) = (long_acceleration * delta_t);
+	process_noise(3) = (1/2.0 * delta_t * delta_t * yaw_rate_acceleration);
+	process_noise(4) = (yaw_rate_acceleration * delta_t);
+
+	if(psi_dot != 0) {
+		transition(0) = (v/(float)psi_dot * (sin(psi + psi_dot * delta_t) - sin(psi)));
+		transition(1) = (v/(float)psi_dot * (-cos(psi + psi_dot * delta_t) + cos(psi)));
+		transition(2) = 0;
+		transition(3) = (psi_dot * delta_t);
+		transition(4) = 0;
+	} else {
+		transition(0) = (v * cos(psi) * delta_t);
+		transition(1) = (v * sin(psi) * delta_t);
+		transition(2) = 0;
+		transition(3) = (psi_dot * delta_t);
+		transition(4) = 0;
+	}
+
+	return transition + process_noise;
+}
+
+VectorXd UKF::predict(VectorXd sigma_point, double delta_t) {
+	return sigma_point.head(n_x_) + calculate_transition(sigma_point, delta_t);
+}
+
+MatrixXd UKF::predictSigmaPoints(MatrixXd Xsig_aug, double delta_t) {
+	MatrixXd predictions(n_x_, 2 * n_aug_ + 1);
+	for(int i=0; i<Xsig_aug.cols(); ++i) {
+		predictions.col(i) = predict(Xsig_aug.col(i), delta_t);
+	}
+	return predictions;
+}
+
 /**
  * Predicts sigma points, the state, and the state covariance matrix.
  * @param {double} delta_t the change in time (in seconds) between the last
@@ -191,12 +240,15 @@ void UKF::Prediction(double delta_t) {
 	 Complete this function! Estimate the object's location. Modify the state
 	 vector, x_. Predict sigma points, the state, and the state covariance matrix.
 	 */
+
 	// Generate Sigma points
 	MatrixXd Xsig_aug = generate_sigma_points();
 
-	// Use the prediction function to predict the k+1 values for these sigma points matrix(5, 2*7+1)
-		// TODO: Need to store these predicted sigma points for use in the measurement update step
+	// Use the prediction function to predict the k+1 values for these sigma points
+	Xsig_pred_ = predictSigmaPoints(Xsig_aug, delta_t);
+
 	// Use these values to compute the mean and covariance for the state predicted at time k+1
+
 	// Store the state in x_ and P_
 }
 

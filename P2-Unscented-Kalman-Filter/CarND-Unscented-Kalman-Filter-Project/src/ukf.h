@@ -114,6 +114,9 @@ public:
 
 private:
 	MatrixXd generate_sigma_points();
+	MatrixXd predictSigmaPoints(MatrixXd Xsig_aug, double delta_t);
+	VectorXd predict(VectorXd sigma_point, double delta_t);
+	VectorXd calculate_transition(VectorXd sigma_point, double delta_t);
 };
 
 #endif /* UKF_H */
