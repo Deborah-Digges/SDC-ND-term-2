@@ -131,4 +131,11 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 
 	 You'll also need to calculate the radar NIS.
 	 */
+	// Map the predicted state x_ to the the measurement space
+		// Use the predicted sigma points
+		// Transform each predicted sigma point to measurement space
+		// Calculate the mean z_pred and the covariance S of the predicted points
+
+	// Calculate the cross-correlation matrix
+	// Use these to update the state x_ and P_ using the Kalman Gain
 }
