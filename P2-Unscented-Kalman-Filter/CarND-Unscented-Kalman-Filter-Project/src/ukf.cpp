@@ -99,13 +99,13 @@ UKF::~UKF() {
 void UKF::init(MeasurementPackage meas_package) {
 	// Initialize state x based on whether RADAR or LIDAR
 	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
-		std::cout << "RADAR" << std::endl;
+//		std::cout << "RADAR" << std::endl;
 		double rho = meas_package.raw_measurements_[0];
 		double phi = meas_package.raw_measurements_[1];
 		double rho_dot = meas_package.raw_measurements_[2];
 		x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
 	} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
-		std::cout << "LASER" << std::endl;
+//		std::cout << "LASER" << std::endl;
 		x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
 	}
 	if(x_(0) == 0 && x_(1) == 0) {
@@ -115,9 +115,9 @@ void UKF::init(MeasurementPackage meas_package) {
 	previous_measurement_ = meas_package;
 	previous_timestamp_ = meas_package.timestamp_;
 	is_initialized_ = true;
-	std::cout << "x_" << x_ << std::endl;
-	std::cout << "P_" << P_ << std::endl;
-	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
+//	std::cout << "x_" << x_ << std::endl;
+//	std::cout << "P_" << P_ << std::endl;
+//	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
 }
 /**
  * @param {MeasurementPackage} meas_package The latest measurement data of
@@ -358,7 +358,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	  Zsig.col(i) = transform_to_measurement_space(Xsig_pred_.col(i));
 	}
 
-	std::cout << "Zsig" << Zsig << std::endl;
+//	std::cout << "Zsig" << Zsig << std::endl;
 
 	// Calculate the mean z_pred and the covariance S of the predicted points
 	VectorXd z_pred = VectorXd(n_z_);
