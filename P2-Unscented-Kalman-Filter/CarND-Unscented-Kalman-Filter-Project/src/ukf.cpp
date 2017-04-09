@@ -124,12 +124,6 @@ void UKF::init(MeasurementPackage meas_package) {
  * either radar or laser.
  */
 void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
-	/**
-	 TODO:
-
-	 Complete this function! Make sure you switch between lidar and radar
-	 measurements.
-	 */
 	// If not initialized, initialize
 	if(!is_initialized_) {
 		init(meas_package);
@@ -224,7 +218,7 @@ VectorXd UKF::calculate_transition(VectorXd sigma_point, double delta_t) {
 		transition(0) = (v * cos(psi) * delta_t);
 		transition(1) = (v * sin(psi) * delta_t);
 		transition(2) = 0;
-		transition(3) = (psi_dot * delta_t);
+		transition(3) = 0;
 		transition(4) = 0;
 	}
 
@@ -237,7 +231,7 @@ VectorXd UKF::predict(VectorXd sigma_point, double delta_t) {
 
 MatrixXd UKF::predictSigmaPoints(MatrixXd Xsig_aug, double delta_t) {
 	MatrixXd predictions(n_x_, 2 * n_aug_ + 1);
-	for(int i=0; i<Xsig_aug.cols(); ++i) {
+	for(int i=0; i< 2 * n_aug_ + 1; ++i) {
 		predictions.col(i) = predict(Xsig_aug.col(i), delta_t);
 	}
 	return predictions;
@@ -296,10 +290,6 @@ VectorXd UKF::transform_to_measurement_space(VectorXd predicted_state_sigma_poin
  * measurement and this one.
  */
 void UKF::Prediction(double delta_t) {
-	/**
-	 Complete this function! Estimate the object's location. Modify the state
-	 vector, x_. Predict sigma points, the state, and the state covariance matrix.
-	 */
 
 	// Generate Sigma points
 	MatrixXd Xsig_aug = generate_sigma_points();
