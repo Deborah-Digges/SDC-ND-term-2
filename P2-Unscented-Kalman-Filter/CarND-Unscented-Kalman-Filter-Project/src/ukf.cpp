@@ -30,11 +30,11 @@ UKF::UKF() {
 	// initial covariance matrix
 	P_ = MatrixXd(5, 5);
 	P_.fill(0.0);
-	P_ << 1, 0, 0, 0, 0,
-		  0, 1, 0, 0, 0,
-		  0, 0, 1000, 0, 0,
-		  0, 0, 0, 1000, 0,
-		  0, 0, 0, 0, 1000;
+	P_ << 2, 0, 0, 0,0,
+	0, 4, 0, 0,0,
+	0, 0, 1, 0,0,
+	0, 0, 0, 0.5,0,
+	0, 0, 0, 0,0.5;
 
 	// Number of rows in our state vector
 	n_x_ = x_.rows();
@@ -93,29 +93,6 @@ UKF::UKF() {
 	H_laser_ = MatrixXd(2, n_x_);
 	H_laser_ << 1, 0, 0, 0, 0,
 				0, 1, 0, 0, 0;
-//	std::cout << "is_initialized_" << is_initialized_ << std::endl;
-//	std::cout << "use_laser_" << use_laser_ << std::endl;
-//	std::cout << "use_radar_" << use_radar_ << std::endl;
-//	std::cout << "x_" << x_ << std::endl;
-//	std::cout << "P_" << P_ << std::endl;
-//	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
-//	std::cout << "std_a_" << std_a_ << std::endl;
-//	std::cout << "std_yawdd_" << std_yawdd_ << std::endl;
-//	std::cout << "std_laspx_" <<  std_laspx_ << std::endl;
-//	std::cout << "std_laspy_" << std_laspy_ << std::endl;
-//	std::cout << "std_radr_" <<std_radr_ << std::endl;
-//	std::cout << "std_radphi_" << std_radphi_ << std::endl;
-//	std::cout << "std_radrd_" << std_radrd_  << std::endl;
-//	std::cout << "weights_" << weights_ << std::endl;
-//	std::cout << "n_x_" << n_x_ << std::endl;
-//	std::cout << "n_aug_" << n_aug_ << std::endl;
-//	std::cout << "lambda_" << lambda_ << std::endl;
-//	std::cout << "NIS_radar_" << NIS_radar_ << std::endl;
-//	std::cout << "NIS_laser_" << NIS_laser_ << std::endl;
-//	std::cout << "R_laser_" << R_laser_ << std::endl;
-//	std::cout << "R_radar_" << R_radar_ << std::endl;
-//	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
-//	std::cout << "H_laser_" << H_laser_ << std::endl;
 }
 
 UKF::~UKF() {
@@ -159,10 +136,11 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	}
 
 	double dt = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
+//	std::cout << "dt: " << dt << std::endl;
 	previous_timestamp_ = meas_package.timestamp_;
-	if(dt > 0.001) {
+//	if(dt > 0.001) {
 		Prediction(dt);
-	}
+//	}
 
 	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
 		UpdateRadar(meas_package);
@@ -310,14 +288,18 @@ void UKF::Prediction(double delta_t) {
 
 	// Generate Sigma points
 	MatrixXd Xsig_aug = generate_sigma_points();
+//	std::cout << "Xsig_aug" << Xsig_aug << std::endl;
 
 	// Use the prediction function to predict the k+1 values for these sigma points
 	Xsig_pred_ = predictSigmaPoints(Xsig_aug, delta_t);
+//	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
 
 	// Use these values to compute the mean and co-variance for the state predicted at time k+1
 	x_ << compute_mean();
+//	std::cout << "x_" << x_ << std::endl;
 
 	P_ << compute_covariance();
+//	std::cout << "P_" << P_ << std::endl;
 }
 
 /**
@@ -373,6 +355,7 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	  Zsig.col(i) = transform_to_measurement_space(Xsig_pred_.col(i));
 	}
 
+	std::cout << "Zsig" << Zsig << std::endl;
 	// Calculate the mean z_pred and the covariance S of the predicted points
 	VectorXd z_pred = VectorXd(n_z_);
 	z_pred.fill(0.0);
