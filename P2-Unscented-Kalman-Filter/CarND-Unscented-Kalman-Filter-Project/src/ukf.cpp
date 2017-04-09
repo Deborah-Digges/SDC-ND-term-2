@@ -142,7 +142,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	}
 
 	float dt = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
-
+	previous_timestamp_ = meas_package.timestamp_;
 	if(dt > 0.001) {
 		Prediction(dt);
 	}
