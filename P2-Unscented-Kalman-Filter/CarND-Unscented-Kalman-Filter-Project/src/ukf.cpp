@@ -12,8 +12,6 @@ using std::vector;
  * Initializes Unscented Kalman filter
  */
 UKF::UKF() {
-	//	 TODO: Change values for std_a_ and std_yawdd_
-
 	// Initially the UKF is not initialized
 	is_initialized_ = false;
 
@@ -29,7 +27,6 @@ UKF::UKF() {
 
 	// initial covariance matrix
 	P_ = MatrixXd(5, 5);
-	P_.fill(0.0);
 	P_ << 1, 0, 0, 0,0,
 	0, 1, 0, 0,0,
 	0, 0, 1, 0,0,
@@ -43,6 +40,7 @@ UKF::UKF() {
 	n_aug_ = n_x_ + 2;
 
 	Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
+	Xsig_pred_.fill(0.0);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
 	std_a_ = 0.1;
