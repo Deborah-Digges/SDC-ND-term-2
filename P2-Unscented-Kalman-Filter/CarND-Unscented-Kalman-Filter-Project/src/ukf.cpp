@@ -109,6 +109,8 @@ UKF::UKF() {
 //	std::cout << "NIS_laser_" << NIS_laser_ << std::endl;
 //	std::cout << "R_laser_" << R_laser_ << std::endl;
 //	std::cout << "R_radar_" << R_radar_ << std::endl;
+//	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
+//	std::cout << "H_laser_" << H_laser_ << std::endl;
 }
 
 UKF::~UKF() {
