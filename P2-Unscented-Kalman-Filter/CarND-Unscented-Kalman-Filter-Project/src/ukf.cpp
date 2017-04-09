@@ -136,15 +136,25 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	if(!is_initialized_) {
 		// Initialize state x based on whether RADAR or LIDAR
 		if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+			std::cout << "RADAR" << std::endl;
 			double rho = meas_package.raw_measurements_[0];
 			double phi = meas_package.raw_measurements_[1];
 			double rho_dot = meas_package.raw_measurements_[2];
 			x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
 		} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+			std::cout << "LASER" << std::endl;
 			x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
 		}
+		if(x_(0) == 0 && x_(1) == 0) {
+			x_(0) = 0.01;
+			x_(1) = 0.01;
+		}
+
 		previous_timestamp_ = meas_package.timestamp_;
 		is_initialized_ = true;
+		std::cout << "x_" << x_ << std::endl;
+		std::cout << "P_" << P_ << std::endl;
+		std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
 		return;
 	}
 

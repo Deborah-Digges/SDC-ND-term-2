@@ -75,7 +75,7 @@ public:
 
   MatrixXd R_radar_;
 
-  double previous_timestamp_;
+  long long previous_timestamp_;
 
   MatrixXd H_laser_;
   /**
