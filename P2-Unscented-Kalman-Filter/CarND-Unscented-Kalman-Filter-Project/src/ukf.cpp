@@ -30,6 +30,11 @@ UKF::UKF() {
 	// initial covariance matrix
 	P_ = MatrixXd(5, 5);
 	P_.fill(0.0);
+	P_ << 1, 0, 0, 0, 0,
+		  0, 1, 0, 0, 0,
+		  0, 0, 1000, 0, 0,
+		  0, 0, 0, 1000, 0,
+		  0, 0, 0, 0, 1000;
 
 	// Number of rows in our state vector
 	n_x_ = x_.rows();
