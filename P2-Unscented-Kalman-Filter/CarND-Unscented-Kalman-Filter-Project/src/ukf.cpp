@@ -273,6 +273,11 @@ VectorXd UKF::transform_to_measurement_space(VectorXd predicted_state_sigma_poin
 	double psi = predicted_state_sigma_point(3);
 	double psi_dot = predicted_state_sigma_point(4);
 
+	if(px == 0 && py == 0) {
+		measurement_space_sigma_point << 0, 0, 0;
+		return measurement_space_sigma_point;
+	}
+
 	// Rho
 	measurement_space_sigma_point(0) = sqrt(pow(px, 2) + pow(py, 2));
 
@@ -344,14 +349,6 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
  * @param {MeasurementPackage} meas_package
  */
 void UKF::UpdateRadar(MeasurementPackage meas_package) {
-	/**
-	 Complete this function! Use radar data to update the belief about the object's
-	 position. Modify the state vector, x_, and covariance, P_.
-
-	 You'll also need to calculate the radar NIS.
-	 */
-
-
 	// Map the predicted state x_ to the the measurement space
 
 	int n_z_ = 3; // Number of dimensions in the measurement space for RADAR
