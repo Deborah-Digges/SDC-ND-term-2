@@ -114,6 +114,7 @@ void UKF::init(MeasurementPackage meas_package) {
 	previous_timestamp_ = meas_package.timestamp_;
 	is_initialized_ = true;
 }
+
 /**
  * @param {MeasurementPackage} meas_package The latest measurement data of
  * either radar or laser.
@@ -306,12 +307,6 @@ void UKF::Prediction(double delta_t) {
  * @param {MeasurementPackage} meas_package
  */
 void UKF::UpdateLidar(MeasurementPackage meas_package) {
-	/**
-	 Complete this function! Use lidar data to update the belief about the object's
-	 position. Modify the state vector, x_, and covariance, P_.
-
-	 You'll also need to calculate the lidar NIS.
-	 */
 	VectorXd z_pred = H_laser_ * x_;
 
 	VectorXd z = meas_package.raw_measurements_;
