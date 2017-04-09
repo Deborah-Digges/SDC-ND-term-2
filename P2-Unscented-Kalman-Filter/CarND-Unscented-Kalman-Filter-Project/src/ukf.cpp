@@ -359,9 +359,14 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	}
 
 	std::cout << "Zsig" << Zsig << std::endl;
+
 	// Calculate the mean z_pred and the covariance S of the predicted points
 	VectorXd z_pred = VectorXd(n_z_);
 	z_pred.fill(0.0);
+
+	for(int i=0; i<Zsig.cols(); ++i) {
+		z_pred += (weights_(i) * Zsig.col(i));
+	}
 
 	//measurement covariance matrix S
 	MatrixXd S = MatrixXd(n_z_, n_z_);
