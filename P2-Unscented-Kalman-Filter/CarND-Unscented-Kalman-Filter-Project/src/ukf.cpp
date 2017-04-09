@@ -99,13 +99,11 @@ UKF::~UKF() {
 void UKF::init(MeasurementPackage meas_package) {
 	// Initialize state x based on whether RADAR or LIDAR
 	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
-//		std::cout << "RADAR" << std::endl;
 		double rho = meas_package.raw_measurements_[0];
 		double phi = meas_package.raw_measurements_[1];
 		double rho_dot = meas_package.raw_measurements_[2];
 		x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
 	} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
-//		std::cout << "LASER" << std::endl;
 		x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
 	}
 	if(x_(0) == 0 && x_(1) == 0) {
@@ -115,9 +113,6 @@ void UKF::init(MeasurementPackage meas_package) {
 	previous_measurement_ = meas_package;
 	previous_timestamp_ = meas_package.timestamp_;
 	is_initialized_ = true;
-//	std::cout << "x_" << x_ << std::endl;
-//	std::cout << "P_" << P_ << std::endl;
-//	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
 }
 /**
  * @param {MeasurementPackage} meas_package The latest measurement data of
@@ -131,20 +126,17 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	}
 
 	double dt = (meas_package.timestamp_ - previous_timestamp_) / 1000000.0;
-//	std::cout << "dt: " << dt << std::endl;
 	previous_timestamp_ = meas_package.timestamp_;
-//	if(dt > 0.001) {
-		try{
-			Prediction(dt);
-		} catch(std::range_error e) {
-			init(previous_measurement_);
-			P_ << 1, 0, 0, 0,0,
-							0, 1, 0, 0,0,
-							0, 0, 1, 0,0,
-							0, 0, 0, 1,0,
-							0, 0, 0, 0,1;
-		}
-//	}
+	try{
+		Prediction(dt);
+	} catch(std::range_error e) {
+		init(previous_measurement_);
+		P_ << 1, 0, 0, 0,0,
+						0, 1, 0, 0,0,
+						0, 0, 1, 0,0,
+						0, 0, 0, 1,0,
+						0, 0, 0, 0,1;
+	}
 
 	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
 		UpdateRadar(meas_package);
@@ -299,18 +291,14 @@ void UKF::Prediction(double delta_t) {
 
 	// Generate Sigma points
 	MatrixXd Xsig_aug = generate_sigma_points();
-//	std::cout << "Xsig_aug" << Xsig_aug << std::endl;
 
 	// Use the prediction function to predict the k+1 values for these sigma points
 	Xsig_pred_ = predictSigmaPoints(Xsig_aug, delta_t);
-//	std::cout << "Xsig_pred_" << Xsig_pred_ << std::endl;
 
 	// Use these values to compute the mean and co-variance for the state predicted at time k+1
 	x_ << compute_mean();
-//	std::cout << "x_" << x_ << std::endl;
 
 	P_ << compute_covariance();
-//	std::cout << "P_" << P_ << std::endl;
 }
 
 /**
@@ -357,8 +345,6 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	for(int i=0; i<Xsig_pred_.cols(); ++i) {
 	  Zsig.col(i) = transform_to_measurement_space(Xsig_pred_.col(i));
 	}
-
-//	std::cout << "Zsig" << Zsig << std::endl;
 
 	// Calculate the mean z_pred and the covariance S of the predicted points
 	VectorXd z_pred = VectorXd(n_z_);
