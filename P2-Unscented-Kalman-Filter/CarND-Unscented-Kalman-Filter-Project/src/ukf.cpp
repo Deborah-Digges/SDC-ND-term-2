@@ -329,7 +329,8 @@ void UKF::UpdateLidar(MeasurementPackage meas_package) {
 	long x_size = x_.rows();
 	MatrixXd I = MatrixXd::Identity(x_size, x_size);
 	P_ = (I - K * H_laser_) * P_;
-	// TODO: Calculate NIS
+
+	NIS_laser_ = y.transpose() * Si * y;
 }
 
 /**
@@ -395,5 +396,5 @@ void UKF::UpdateRadar(MeasurementPackage meas_package) {
 	x_ = x_ + K* (z_diff);
 	P_ = P_ - K * S * K.transpose();
 
-	// TODO: Calculate NIS
+	NIS_radar_ = z_diff.transpose() * S.transpose() * z_diff;
 }
