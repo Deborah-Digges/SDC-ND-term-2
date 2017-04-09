@@ -30,11 +30,11 @@ UKF::UKF() {
 	// initial covariance matrix
 	P_ = MatrixXd(5, 5);
 	P_.fill(0.0);
-	P_ << 2, 0, 0, 0,0,
-	0, 4, 0, 0,0,
+	P_ << 1, 0, 0, 0,0,
+	0, 1, 0, 0,0,
 	0, 0, 1, 0,0,
-	0, 0, 0, 0.5,0,
-	0, 0, 0, 0,0.5;
+	0, 0, 0, 1,0,
+	0, 0, 0, 0,1;
 
 	// Number of rows in our state vector
 	n_x_ = x_.rows();
@@ -45,10 +45,10 @@ UKF::UKF() {
 	Xsig_pred_ = MatrixXd(n_x_, 2 * n_aug_ + 1);
 
 	// Process noise standard deviation longitudinal acceleration in m/s^2
-	std_a_ = 1.5;
+	std_a_ = 0.1;
 
 	// Process noise standard deviation yaw acceleration in rad/s^2
-	std_yawdd_ = 0.55;
+	std_yawdd_ = 0.1;
 
 	// Laser measurement noise standard deviation position1 in m
 	std_laspx_ = 0.15;
@@ -98,6 +98,29 @@ UKF::UKF() {
 UKF::~UKF() {
 }
 
+void UKF::init(MeasurementPackage meas_package) {
+	// Initialize state x based on whether RADAR or LIDAR
+	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
+		std::cout << "RADAR" << std::endl;
+		double rho = meas_package.raw_measurements_[0];
+		double phi = meas_package.raw_measurements_[1];
+		double rho_dot = meas_package.raw_measurements_[2];
+		x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
+	} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
+		std::cout << "LASER" << std::endl;
+		x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
+	}
+	if(x_(0) == 0 && x_(1) == 0) {
+		x_(0) = 0.01;
+		x_(1) = 0.01;
+	}
+	previous_measurement_ = meas_package;
+	previous_timestamp_ = meas_package.timestamp_;
+	is_initialized_ = true;
+	std::cout << "x_" << x_ << std::endl;
+	std::cout << "P_" << P_ << std::endl;
+	std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
+}
 /**
  * @param {MeasurementPackage} meas_package The latest measurement data of
  * either radar or laser.
@@ -111,27 +134,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	 */
 	// If not initialized, initialize
 	if(!is_initialized_) {
-		// Initialize state x based on whether RADAR or LIDAR
-		if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
-			std::cout << "RADAR" << std::endl;
-			double rho = meas_package.raw_measurements_[0];
-			double phi = meas_package.raw_measurements_[1];
-			double rho_dot = meas_package.raw_measurements_[2];
-			x_ << rho * cos(phi), rho * sin(phi), 0, 0, 0;
-		} else if(meas_package.sensor_type_ == MeasurementPackage::LASER) {
-			std::cout << "LASER" << std::endl;
-			x_ << meas_package.raw_measurements_[0], meas_package.raw_measurements_[1], 0, 0, 0;
-		}
-		if(x_(0) == 0 && x_(1) == 0) {
-			x_(0) = 0.01;
-			x_(1) = 0.01;
-		}
-
-		previous_timestamp_ = meas_package.timestamp_;
-		is_initialized_ = true;
-		std::cout << "x_" << x_ << std::endl;
-		std::cout << "P_" << P_ << std::endl;
-		std::cout << "previous_timestamp_" << previous_timestamp_ << std::endl;
+		init(meas_package);
 		return;
 	}
 
@@ -139,7 +142,16 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 //	std::cout << "dt: " << dt << std::endl;
 	previous_timestamp_ = meas_package.timestamp_;
 //	if(dt > 0.001) {
-		Prediction(dt);
+		try{
+			Prediction(dt);
+		} catch(std::range_error e) {
+			init(previous_measurement_);
+			P_ << 1, 0, 0, 0,0,
+							0, 1, 0, 0,0,
+							0, 0, 1, 0,0,
+							0, 0, 0, 1,0,
+							0, 0, 0, 0,1;
+		}
 //	}
 
 	if(meas_package.sensor_type_ == MeasurementPackage::RADAR) {
@@ -147,6 +159,7 @@ void UKF::ProcessMeasurement(MeasurementPackage meas_package) {
 	} else {
 		UpdateLidar(meas_package);
 	}
+	previous_measurement_ = meas_package;
 }
 
 MatrixXd UKF::generate_sigma_points() {
@@ -168,7 +181,11 @@ MatrixXd UKF::generate_sigma_points() {
 
 	//create square root matrix
 	MatrixXd A = P_aug.llt().matrixL();
-
+	if (P_aug.llt().info() == Eigen::NumericalIssue) {
+	    // if decomposition fails, we have numerical issues
+	    std::cout << "LLT failed!" << std::endl;
+	    throw std::range_error("LLT failed");
+	}
 	//create augmented sigma points
 	Xsig_aug.col(0) = x_aug;
 	MatrixXd term = sqrt(lambda_ + n_aug_) * A;

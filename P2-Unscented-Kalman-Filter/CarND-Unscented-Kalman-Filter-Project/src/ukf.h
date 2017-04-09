@@ -78,6 +78,8 @@ public:
   long long previous_timestamp_;
 
   MatrixXd H_laser_;
+
+  MeasurementPackage previous_measurement_;
   /**
    * Constructor
    */
@@ -114,6 +116,7 @@ public:
   void UpdateRadar(MeasurementPackage meas_package);
 
 private:
+  	void init(MeasurementPackage meas_package);
 	MatrixXd generate_sigma_points();
 	MatrixXd predictSigmaPoints(MatrixXd Xsig_aug, double delta_t);
 	VectorXd predict(VectorXd sigma_point, double delta_t);
