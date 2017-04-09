@@ -250,6 +250,7 @@ VectorXd UKF::compute_mean(){
 MatrixXd UKF::compute_covariance() {
 	MatrixXd P(n_x_, n_x_);
 	//predict state covariance matrix
+	P.fill(0.0);
 
 	for(int i=0;i < Xsig_pred_.cols(); ++i) {
 		// state difference
