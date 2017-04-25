@@ -73,7 +73,9 @@ int main() {
 
 	for(int i=0; i < measurement_pack_list.size(); ++i) {
 		std::cout << measurement_pack_list.at(i).control_s_.delta_x_f << "\n";
-
+		for(int j=0; j <  measurement_pack_list.at(i).observation_s_.distance_f.size(); ++j) {
+			std::cout << measurement_pack_list.at(i).observation_s_.distance_f.at(j)<< "\n";
+		}
 	}
 	return 0;
 }
