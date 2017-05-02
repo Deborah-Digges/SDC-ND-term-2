@@ -1,9 +1,8 @@
-/*
- * bayesianFilter.h
- *
- *  Created on: Apr 24, 2017
- *      Author: ddigges
- */
+//============================================================================
+// Name        : bayesianFilter.h
+// Version     : 1.0.0
+// Copyright   : MBRDNA, Udacity
+//============================================================================
 
 #ifndef BAYESIANFILTER_H_
 #define BAYESIANFILTER_H_
@@ -36,12 +35,17 @@ private:
 
 /////private members:
 
-	////////////////
-    //Add members!//
-    ////////////////
+	//flag, if filter is initialized:
 	bool is_initialized_;
-	float control_std;
-	std::vector<float> bel_x_init;
+
+	//precision of control information:
+	float control_std ;
+
+	//precision of observations as standard deviation:
+	float observation_std ;
+
+	//initial belief of state x:
+	std::vector<float> bel_x_init ;
 
 };
 
