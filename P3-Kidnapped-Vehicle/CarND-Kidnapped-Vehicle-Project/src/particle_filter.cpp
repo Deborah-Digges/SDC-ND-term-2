@@ -168,7 +168,8 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   3.33. Note that you'll need to switch the minus sign in that equation to a plus to account 
 	//   for the fact that the map's y-axis actually points downwards.)
 	//   http://planning.cs.uiuc.edu/node99.html
-	for(Particle particle: particles) {
+	for(int i=0; i<particles.size(); ++i) {
+		Particle  particle = particles.at(i);
 		double new_weight = 1;
 		for(LandmarkObs observation: observations) {
 			// Convert the observation as seen by the particle into map coordinates
@@ -178,6 +179,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			new_weight *= observation_probability;
 		}
 		particle.weight = new_weight;
+		weights.at(i) = new_weight;
 	}
 }
 
