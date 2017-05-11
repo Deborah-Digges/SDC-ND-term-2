@@ -90,6 +90,56 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> predicted, std::ve
 
 }
 
+Particle mapObservationToMapCoordinates(LandmarkObs observation, Particle particle) {
+	double x = observation.x;
+	double y = observation.y;
+
+	double xt = particle.x;
+	double yt = particle.y;
+	double theta = particle.theta;
+
+	Particle mapCoordinates;
+
+	mapCoordinates.x = x * cos(theta) - y * sin(theta) + xt;
+	mapCoordinates.y = x * sin(theta) + y * cos(theta) + yt;
+
+	return mapCoordinates;
+
+}
+
+/**
+ * Find the distance between a map landmark and a transformed particle
+ */
+double calculateDistance(Map::single_landmark_s land_mark, Particle map_coordinates) {
+	double x1 = land_mark.x_f;
+	double y1 = land_mark.y_f;
+
+	double x2 = map_coordinates.x;
+	double y2 = map_coordinates.y;
+
+	return sqrt(pow((x1 - x2), 2) + pow((y1 - y2), 2));
+}
+
+
+/**
+ * Find the closest map landmark to a given transformed particle observation
+ */
+Map::single_landmark_s findClosestLandmark(Particle map_coordinates, Map map_landmarks) {
+	Map::single_landmark_s closest_landmark = map_landmarks.landmark_list.at(0);
+	double distance = calculateDistance(map_landmarks.landmark_list.at(0), map_coordinates);
+
+	for(int i=1; i<map_landmarks.landmark_list.size(); ++i) {
+		Map::single_landmark_s current_landmark = map_landmarks.landmark_list.at(i);
+		double current_distance = calculateDistance(current_landmark, map_coordinates);
+
+		if(current_distance < distance) {
+			distance = current_distance;
+			closest_landmark = current_landmark;
+		}
+	}
+	return closest_landmark;
+}
+
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
 		std::vector<LandmarkObs> observations, Map map_landmarks) {
 	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
@@ -103,6 +153,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   3.33. Note that you'll need to switch the minus sign in that equation to a plus to account 
 	//   for the fact that the map's y-axis actually points downwards.)
 	//   http://planning.cs.uiuc.edu/node99.html
+	for(Particle particle: particles) {
+		for(LandmarkObs observation: observations) {
+			// Convert the observation as seen by the particle into map coordinates
+			Particle map_coordinates = mapObservationToMapCoordinates(observation, particle);
+			Map::single_landmark_s closest_landmark = findClosestLandmark(map_coordinates, map_landmarks);
+		}
+	}
 }
 
 void ParticleFilter::resample() {
