@@ -10,6 +10,7 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <math.h>
 
 #include "particle_filter.h"
 
@@ -140,6 +141,20 @@ Map::single_landmark_s findClosestLandmark(Particle map_coordinates, Map map_lan
 	return closest_landmark;
 }
 
+double findObservationProbability(Particle map_coordinates, Map::single_landmark_s closest_landmark, double std_landmark[]) {
+	double mew_x = closest_landmark.x_f;
+	double mew_y = closest_landmark.y_f;
+
+	double x = map_coordinates.x;
+	double y = map_coordinates.y;
+
+	double sigma_x = std_landmark[0];
+	double sigma_y = std_landmark[1];
+
+	return (1/ (2 * M_PI * sigma_x * sigma_y) )
+	    *  pow( M_E, -( pow(x - mew_x,2)/(2 * pow(sigma_x, 2)) + pow(y - mew_y,2)/(2 * pow(sigma_y,2) ) ) );
+}
+
 void ParticleFilter::updateWeights(double sensor_range, double std_landmark[], 
 		std::vector<LandmarkObs> observations, Map map_landmarks) {
 	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. You can read
@@ -154,11 +169,15 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	//   for the fact that the map's y-axis actually points downwards.)
 	//   http://planning.cs.uiuc.edu/node99.html
 	for(Particle particle: particles) {
+		double new_weight = 1;
 		for(LandmarkObs observation: observations) {
 			// Convert the observation as seen by the particle into map coordinates
 			Particle map_coordinates = mapObservationToMapCoordinates(observation, particle);
 			Map::single_landmark_s closest_landmark = findClosestLandmark(map_coordinates, map_landmarks);
+			double observation_probability = findObservationProbability(map_coordinates, closest_landmark, std_landmark);
+			new_weight *= observation_probability;
 		}
+		particle.weight = new_weight;
 	}
 }
 
