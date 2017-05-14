@@ -37,7 +37,7 @@ int main()
   uWS::Hub h;
 
   PID pid;
-  pid.Init(0.08, 0, 5);
+  pid.Init(0.08, 0.003, 5);
   // TODO: Initialize the pid variable.
   double last_timestamp = clock();
   pid.prev_cte = 0;

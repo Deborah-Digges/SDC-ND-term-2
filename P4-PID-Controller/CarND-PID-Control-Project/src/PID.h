@@ -12,6 +12,7 @@ public:
 
   double prev_cte;
   double dt;
+  double total_cte;
   /*
   * Coefficients
   */ 
