@@ -28,14 +28,21 @@ std::string hasData(std::string s) {
   return "";
 }
 
+float clip(float n, float lower, float upper) {
+  return std::max(lower, std::min(n, upper));
+}
+
 int main()
 {
   uWS::Hub h;
 
   PID pid;
+  pid.Init(0.04, 0, 10000000);
   // TODO: Initialize the pid variable.
+  double last_timestamp = clock();
+  pid.prev_cte = 0;
 
-  h.onMessage([&pid](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
+  h.onMessage([&pid, &last_timestamp](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
     // The 4 signifies a websocket message
     // The 2 signifies a websocket event
@@ -57,7 +64,13 @@ int main()
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
+          pid.dt = clock() - last_timestamp;
+          last_timestamp = clock();
+          pid.UpdateError(cte);
           
+          steer_value = clip(-pid.TotalError(), -1.1, 1.1);
+
+          pid.prev_cte = cte;
           // DEBUG
           std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
 
