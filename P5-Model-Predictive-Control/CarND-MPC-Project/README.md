@@ -1,6 +1,69 @@
 # CarND-Controls-MPC
-Self-Driving Car Engineer Nanodegree Program
 
+## Project Description
+
+The purpose of this project is to develop a nonlinear model predictive controller (NMPC) to steer a car around a track in a simulator. The simulator provides a feed of values containing the position of the car, its speed and heading direction. Additionally it provides the coordinates of waypoints along a reference trajectory that the car is to follow. All coordinates are provided in a global coordinate system.
+
+# The Vehicle Model
+
+The vehicle model used in this project is a kinematic bicycle model. It neglects all dynamic effects such as inertia, friction and torque. The model takes changes of heading direction into account and is thus non-linear. The model used consists of the following equations
+
+      // x_[t+1] = x[t] + v[t] * cos(psi[t]) * dt
+      // y_[t+1] = y[t] + v[t] * sin(psi[t]) * dt
+      // psi_[t+1] = psi[t] + v[t] / Lf * delta[t] * dt
+      // v_[t+1] = v[t] + a[t] * dt
+      // cte[t+1] = f(x[t]) - y[t] + v[t] * sin(epsi[t]) * dt
+      // epsi[t+1] = psi[t] - psides[t] + v[t] * delta[t] / Lf * dt
+Here, x,y denote the position of the car, psi the heading direction, v its velocity cte the cross-track error and epsi the orientation error. Lf is the distance between the center of mass of the vehicle and the front wheels and affects the maneuverability. The vehicle model can be found in the class FG_eval.
+
+# Polynomial Fitting and MPC Preprocessing
+
+All computations are performed in the vehicle coordinate system. The coordinates of waypoints in vehicle coordinates are obtained by first shifting the origin to the current poistion of the vehicle and a subsequet 2D rotation to align the x-axis with the heading direction. Therby the waypoints are obtained in the frame of the vehicle. A third order polynomial is then fitted to the waypoints. The transformation between coordinate systems is implemented in transformGlobalToLocal. The transformation used is
+
+ X' =   cos(psi) * (ptsx[i] - x) + sin(psi) * (ptsy[i] - y);
+ Y' =  -sin(psi) * (ptsx[i] - x) + cos(psi) * (ptsy[i] - y);  
+where X',Y' denote coordinates in the vehicle coordinate system. Note that the initial position of the car and heading direction are always zero in this frame. Thus the state of the car in the vehicle cordinate system is
+
+          state << 0, 0, 0, v, cte, epsi;
+initially.
+
+# Optimal Control Problem
+
+For every state value provided by the simulator an optimal trajectory for the next N time steps is computed that minimizes a cost function. The cost function is quadratic in the cross-track error, the error in the heading direction, the difference to the reference velocity, the actuator values and the difference of actuator values in adjacent time steps. Specifically I chose parameter values here that lead to smooth driving both for slow (25mph) and fast velocities (70mph). The control problem is restricted by the vehicle model as well as actuator max and min values. The cost function can be found in FG_eval.
+
+In the receeding horizon problem the cost functio is minimized at each time step, but only the actuations corresponding to the first time step are sent to the simulator. At the next time step the entire optimal control problem is solved again.
+
+# Model Predictive Control with Latency
+
+Additional latency of 100ms is artificially added before sending actuations to the simulator. If we wouldn't handle the latency problem in our controller then oscilations and generally poor trajectories can occur. To overcome this problem I decided to apply actuations after the latency period. which means that I skip first 2 actuations/time steps (0.05 * 2 = 100ms).
+```
+      // compute the optimal trajectory
+      Solution solution = mpc.Solve(state, coeffs);
+      double steer_value = solution.Delta.at(2);
+      double throttle_value= solution.A.at(2);
+```
+This has the advantage that the dynamics is correctly calculated according to the vehicle model even during the latency period - first 2 time steps.
+
+
+
+# Timestep Length and Elapsed Duration (N & dt)
+
+The time T=N dt defines the prediction horizon. Short prediction horizons lead to more responsive controlers, but are less accurate and can suffer from instabilities when chosen too short. Long prediction horizons generally lead to smoother controls. For a given prediction horizon shorter time steps dt imply more accurate controls but also require a larger NMPC problem to be solved, thus increasing latency.
+
+Here I chose values of N and dt such that drives the car smoothly around the track for slow velocities of about 25mph all the way up to about 70mph. The values are N=12 and dt=0.05. Note that the 100ms = 2*dt latency imply that the controls of the first two time steps are not used in the optimization. They are frozen to the values of the previous actuations, like so
+
+# Cost Function Parameters
+
+The cost of a trajectory of length N is computed as follows
+```
+   Cost  = Sum_i cte(i)^2 
+              + epsi(i)^2 
+              + (v(i)-v_ref)^2 + delta(i)^2 
+              + 10 a(i)^2 
+              + 600 [delta(i+1)-delta(i)] 
+              + [a(i+1)-a(i)]
+where the increased weight on steering changes between adjacent time intervalls is the most important in order to arrive at smooth trajectories.
+```
 ---
 
 ## Dependencies
