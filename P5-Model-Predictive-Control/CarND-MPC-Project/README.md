@@ -35,14 +35,8 @@ In the receeding horizon problem the cost functio is minimized at each time step
 
 # Model Predictive Control with Latency
 
-Additional latency of 100ms is artificially added before sending actuations to the simulator. If we wouldn't handle the latency problem in our controller then oscilations and generally poor trajectories can occur. To overcome this problem I decided to apply actuations after the latency period. which means that I skip first 2 actuations/time steps (0.05 * 2 = 100ms).
-```
-      // compute the optimal trajectory
-      Solution solution = mpc.Solve(state, coeffs);
-      double steer_value = solution.Delta.at(2);
-      double throttle_value= solution.A.at(2);
-```
-This has the advantage that the dynamics is correctly calculated according to the vehicle model even during the latency period - first 2 time steps.
+We account for latency by assuming the current car drifts at the current speed, heading, and rate of turn for the entire interval forward. These become the initial state for our model. Our algorithm then selects an optimal sequence of steering and throttle adjustments, 100 times a second, for that time forward. This is equivalent to looking ahead while you're driving, realizing you can't do that much about what's immediately in front of you at highway speeds. Your decisions now affect your location, heading and speed a few feet in front of you, not where you are at the current instant.
+
 
 
 
